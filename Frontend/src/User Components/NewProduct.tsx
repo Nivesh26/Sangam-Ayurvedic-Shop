@@ -59,7 +59,7 @@ const NewProduct = () => {
               {/* Product Info */}
               <div className="p-4">
                 <p className="text-sm text-gray-500 mb-1">{product.category}</p>
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors line-clamp-1">
                   {product.name}
                 </h3>
 
