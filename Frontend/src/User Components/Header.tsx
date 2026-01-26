@@ -9,9 +9,9 @@ const Header = () => {
       <span className="text-xl font-bold text-gray-800">Sangam Ayurvedic</span>
     </Link> </div>
     <ul className="hidden md:flex space-x-8 text-gray-700 font-medium">
-      <li><a href="home.html" className="hover:text-blue-600">Home</a></li>
-      <li><a href="#" className="hover:text-blue-600">New</a></li>
-      <li><a href="#" className="hover:text-blue-600">Shop</a></li>
+      <li><Link to="/" className="hover:text-blue-600">Home</Link></li>
+      <li><Link to="/new" className="hover:text-blue-600">New</Link></li>
+      <li><Link to="/shop" className="hover:text-blue-600">Shop</Link></li>
       <li><a href="#" className="hover:text-blue-600">About Us</a></li>
       <li><a href="#" className="hover:text-blue-600">Contact</a></li>
     </ul>
