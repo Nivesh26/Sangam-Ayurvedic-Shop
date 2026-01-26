@@ -6,6 +6,7 @@ import Feature from '../User Components/Feature.tsx'
 import Category from '../User Components/Category.tsx'
 import Bestselling from '../User Components/Bestselling.tsx'
 import NewProduct from '../User Components/NewProduct.tsx'
+import CTA from '../User Components/CTA.tsx'
 
 const Homepage = () => {
   return (
@@ -15,6 +16,7 @@ const Homepage = () => {
         <Feature/>
         {/* <Category/> */}
         <Bestselling/>
+        <CTA/>
         <NewProduct/>
         <Footer />
     </div>
