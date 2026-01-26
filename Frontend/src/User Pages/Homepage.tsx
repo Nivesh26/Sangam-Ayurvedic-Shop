@@ -12,7 +12,7 @@ const Homepage = () => {
         <Header />
         <Hero/>
         <Feature/>
-        <Category/>
+        {/* <Category/> */}
         <Bestselling/>
         <Footer />
     </div>
