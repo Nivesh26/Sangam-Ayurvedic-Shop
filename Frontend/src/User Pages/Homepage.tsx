@@ -5,6 +5,7 @@ import Hero from '../User Components/Hero.tsx'
 import Feature from '../User Components/Feature.tsx'
 import Category from '../User Components/Category.tsx'
 import Bestselling from '../User Components/Bestselling.tsx'
+import NewProduct from '../User Components/NewProduct.tsx'
 
 const Homepage = () => {
   return (
@@ -14,6 +15,7 @@ const Homepage = () => {
         <Feature/>
         {/* <Category/> */}
         <Bestselling/>
+        <NewProduct/>
         <Footer />
     </div>
   )
