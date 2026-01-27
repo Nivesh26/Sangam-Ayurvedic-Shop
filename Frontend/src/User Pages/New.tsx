@@ -2,6 +2,9 @@ import { useState } from 'react'
 import Header from '../User Components/Header.tsx'
 import Footer from '../User Components/Footer.tsx'
 import productImage from '../assets/176775850311hn1.webp'
+import prdoductImage2 from '../assets/SpecialChyawanprash.webp'
+import prdoductImage3 from '../assets/SoanPapdi.webp'
+import productImage4 from '../assets/Ghee.webp'
 
 const New = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
@@ -10,6 +13,7 @@ const New = () => {
   const maxPriceLimit = 10000
 
   const products = [
+
     {
       id: 1,
       name: 'Dant Kanti Natural Toothpaste 43g (Buy 11+ 1 Free) Hanger',
@@ -19,38 +23,38 @@ const New = () => {
     },
     {
       id: 2,
-      name: 'Ashwagandha Capsules',
+      name: 'Special Chyawanprash',
       price: 650,
-      image: productImage,
+      image: prdoductImage2,
       category: 'Immunity Boosters'
     },
     {
       id: 3,
-      name: 'Turmeric Curcumin',
+      name: 'Soan Papdi',
       price: 550,
-      image: productImage,
+      image: prdoductImage3,
       category: 'Herbal Supplements'
     },
     {
       id: 4,
-      name: 'Neem Face Wash',
+      name: 'Cow\'s Ghee',
       price: 350,
-      image: productImage,
+      image: productImage4,
       category: 'Skin & Hair Care'
     },
     {
       id: 5,
-      name: 'Triphala Powder',
-      price: 480,
-      image: productImage,
-      category: 'Digestive Care'
+      name: 'Soan Papdi',
+      price: 550,
+      image: prdoductImage3,
+      category: 'Herbal Supplements'
     },
     {
       id: 6,
-      name: 'Brahmi Oil',
-      price: 520,
-      image: productImage,
-      category: 'Oils & Massage'
+      name: 'Cow\'s Ghee',
+      price: 350,
+      image: productImage4,
+      category: 'Skin & Hair Care'
     }
   ]
 

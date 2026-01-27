@@ -1,36 +1,43 @@
 import productImage from '../assets/176775850311hn1.webp'
+import prdoductImage2 from '../assets/SpecialChyawanprash.webp'
+import prdoductImage3 from '../assets/SoanPapdi.webp'
+import productImage4 from '../assets/Ghee.webp'
 
 const NewProduct = () => {
   const products = [
     {
       id: 1,
+      name: 'Special Chyawanprash',
+      price: 650,
+      image: prdoductImage2,
+      category: 'Immunity Boosters'
+    },
+
+
+    {
+      id: 2,
+      name: 'Soan Papdi',
+      price: 550,
+      image: prdoductImage3,
+      category: 'Herbal Supplements'
+    },
+    {
+      id: 3,
+      name: 'Cow\'s Ghee',
+      price: 350,
+      image: productImage4,
+      category: 'Skin & Hair Care'
+    },
+
+    {
+      id: 4,
       name: 'Dant Kanti Natural Toothpaste 43g (Buy 11+ 1 Free) Hanger',
       price: 450,
       image: productImage,
       category: 'Digestive Care'
-    },
-    {
-      id: 2,
-      name: 'Ashwagandha Capsules',
-      price: 650,
-      image: productImage,
-      category: 'Immunity Boosters'
-    },
-    {
-      id: 3,
-      name: 'Turmeric Curcumin',
-      price: 550,
-      image: productImage,
-      category: 'Herbal Supplements'
-    },
-    {
-      id: 4,
-      name: 'Neem Face Wash',
-      price: 350,
-      image: productImage,
-      category: 'Skin & Hair Care'
     }
   ]
+
 
   return (
     <section className="w-full bg-gray-50 py-8">
