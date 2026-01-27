@@ -13,7 +13,7 @@ const Header = () => {
       <li><Link to="/new" className="hover:text-blue-600">New</Link></li>
       <li><Link to="/shop" className="hover:text-blue-600">Shop</Link></li>
       <li><Link to="/aboutus" className="hover:text-blue-600">About Us</Link></li>
-      <li><a href="#" className="hover:text-blue-600">Contact</a></li>
+      <li><Link to="/contact" className="hover:text-blue-600">Contact</Link></li>
     </ul>
 
     <div className="hidden md:flex items-center space-x-3">
