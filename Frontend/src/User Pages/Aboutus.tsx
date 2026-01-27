@@ -122,19 +122,6 @@ const Aboutus = () => {
 
             {/* Location Card */}
             <div className="bg-gradient-to-br from-green-50 to-amber-50 rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
-              <div className="flex items-start mb-6">
-                <div className="bg-green-600 rounded-full p-4 mr-4 shrink-0">
-                  <FaMapMarkerAlt className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Visit Us</h3>
-                  <p className="text-gray-700 text-lg leading-relaxed">
-                    Patan Durbar Square, Lalitpur<br />
-                    Kathmandu Valley, Nepal
-                  </p>
-                </div>
-              </div>
-
               {/* Google Map */}
               <div className="rounded-lg overflow-hidden">
                 <iframe
