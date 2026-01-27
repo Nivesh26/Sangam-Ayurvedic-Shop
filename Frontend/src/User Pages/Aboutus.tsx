@@ -47,7 +47,7 @@ const Aboutus = () => {
         <section className="py-8">
           <div className="max-w-7xl mx-auto px-6 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-              Sangam Ayurvedic Shop
+              Sangam Ayurvedic 
             </h1>
           </div>
         </section>
@@ -55,7 +55,6 @@ const Aboutus = () => {
         {/* Our Story Section */}
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">Our Story</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               {/* Image */}
               <div className="order-2 md:order-1">
