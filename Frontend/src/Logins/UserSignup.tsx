@@ -80,7 +80,7 @@ const UserSignup = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="your@email.com"
+                    placeholder="Enter your email"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors placeholder-gray-400"
                   />
                 </div>
@@ -95,7 +95,7 @@ const UserSignup = () => {
                     value={formData.phoneNumber}
                     onChange={handleChange}
                     required
-                    placeholder="e.g. 9808000000"
+                    placeholder="Enter your phone number"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors placeholder-gray-400"
                   />
                 </div>
@@ -111,7 +111,7 @@ const UserSignup = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      placeholder="••••••••"
+                      placeholder="Enter your password"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors placeholder-gray-400"
                     />
                   </div>
@@ -126,7 +126,7 @@ const UserSignup = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      placeholder="••••••••"
+                      placeholder="Confirm your password"
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors placeholder-gray-400 ${
                         !passwordMatch ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
                       }`}
