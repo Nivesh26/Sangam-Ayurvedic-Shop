@@ -124,8 +124,8 @@ const Contact = () => {
                   {/* Location Card */}
                   <div>
                     <div className="flex items-start mb-4">
-                      <div className="bg-green-600 rounded-full p-3 mr-4 shrink-0">
-                        <FaMapMarkerAlt className="w-5 h-5 text-white" />
+                      <div className="bg-amber-100 rounded-full p-3 mr-4 shrink-0">
+                        <FaMapMarkerAlt className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-1">Visit Us</h3>
