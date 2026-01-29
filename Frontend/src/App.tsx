@@ -5,6 +5,8 @@ import New from './User Pages/New'
 import Aboutus from './User Pages/Aboutus'
 import Contact from './User Pages/Contact'
 import Userlogin from './Logins/Userlogin'
+import WhatsAppChat from './User Components/WhatsAppChat'
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -18,6 +20,7 @@ const App = () => {
         {/* Logins */}
         <Route path="/login" element={<Userlogin />} />
       </Routes>
+      <WhatsAppChat />
     </BrowserRouter>
   )
 }
