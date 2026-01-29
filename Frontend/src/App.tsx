@@ -4,7 +4,7 @@ import Shop from './User Pages/Shop'
 import New from './User Pages/New'
 import Aboutus from './User Pages/Aboutus'
 import Contact from './User Pages/Contact'
-
+import Userlogin from './Logins/Userlogin'
 const App = () => {
   return (
     <BrowserRouter>
@@ -14,6 +14,9 @@ const App = () => {
         <Route path="/new" element={<New />} />
         <Route path="/aboutus" element={<Aboutus />} />
         <Route path="/contact" element={<Contact />} />
+
+        {/* Logins */}
+        <Route path="/login" element={<Userlogin />} />
       </Routes>
     </BrowserRouter>
   )
