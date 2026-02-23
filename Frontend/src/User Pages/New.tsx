@@ -150,7 +150,25 @@ const New = () => {
                   </div>
 
                   {/* Max Price Slider */}
-        
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-2">Maximum Price</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPriceLimit}
+                      value={maxPrice}
+                      onChange={(e) => {
+                        const newMax = Number(e.target.value)
+                        if (newMax >= minPrice) {
+                          setMaxPrice(newMax)
+                        }
+                      }}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${(maxPrice / maxPriceLimit) * 100}%, #2563eb ${(maxPrice / maxPriceLimit) * 100}%, #2563eb 100%)`
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </aside>
