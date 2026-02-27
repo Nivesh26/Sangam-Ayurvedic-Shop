@@ -21,8 +21,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
 
         {/* Logins User*/}
-        <Route path="/login" element={<Userlogin />} />
-        <Route path="/signup" element={<UserSignup />} /> 
+   
 
         {/* Logins Admin*/}
         <Route path="/adminlogin" element={<Adminlogin />} />
