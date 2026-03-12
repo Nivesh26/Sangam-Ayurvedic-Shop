@@ -5,16 +5,18 @@ import New from './User Pages/New'
 import Aboutus from './User Pages/Aboutus'
 import Contact from './User Pages/Contact'
 import Userlogin from './Logins/Userlogin'
-import WhatsAppChat from './User Components/WhatsAppChat'
+
 import UserSignup from './Logins/UserSignup'
 import AdminSignup from './Logins/AdminSignup'
 import Adminlogin from './Logins/Adminlogin'
 import Productdetail from './User Pages/Productdetail'
 import Adminhomepage from './Admin/Adminhomepage'
+import Product from './Admin/Product'
+import Orders from './Admin/Orders'
+import Customer from './Admin/Customer'
+import Message from './Admin/Message'
 
 const AppContent = () => {
-  const location = useLocation()
-  const isAdminRoute = location.pathname.startsWith('/admin')
   return (
     <>
       <Routes>
@@ -35,8 +37,12 @@ const AppContent = () => {
 
         {/* Admin Pages*/}
         <Route path="/adminhomepage" element={<Adminhomepage />} />
+        <Route path="/adminproduct" element={<Product />} />
+        <Route path="/adminorders" element={<Orders />} />
+        <Route path="/admincustomer" element={<Customer />} />
+        <Route path="/adminmessage" element={<Message />} />
       </Routes>
-      {!isAdminRoute && <WhatsAppChat />}
+   
     </>
   )
 }
