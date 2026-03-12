@@ -15,6 +15,7 @@ import Product from './Admin/Product'
 import Orders from './Admin/Orders'
 import Customer from './Admin/Customer'
 import Message from './Admin/Message'
+import Cart from './User Pages/Cart'
 
 const AppContent = () => {
   return (
@@ -27,6 +28,8 @@ const AppContent = () => {
         <Route path="/aboutus" element={<Aboutus />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/product" element={<Productdetail />} />
+        <Route path="/cart" element={<Cart />} />
+
         {/* Logins User*/}
         <Route path="/login" element={<Userlogin />} />
         <Route path="/signup" element={<UserSignup />} />
