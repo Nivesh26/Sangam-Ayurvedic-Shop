@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import Homepage from './User Pages/Homepage'
 import Shop from './User Pages/Shop'
 import New from './User Pages/New'
@@ -12,9 +12,11 @@ import Adminlogin from './Logins/Adminlogin'
 import Productdetail from './User Pages/Productdetail'
 import Adminhomepage from './Admin/Adminhomepage'
 
-const App = () => {
+const AppContent = () => {
+  const location = useLocation()
+  const isAdminRoute = location.pathname.startsWith('/admin')
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         {/* User Pages*/}
         <Route path="/" element={<Homepage />} />
@@ -25,18 +27,24 @@ const App = () => {
         <Route path="/product" element={<Productdetail />} />
         {/* Logins User*/}
         <Route path="/login" element={<Userlogin />} />
-        <Route path="/signup" element={<UserSignup />} /> 
+        <Route path="/signup" element={<UserSignup />} />
 
         {/* Logins Admin*/}
         <Route path="/adminlogin" element={<Adminlogin />} />
         <Route path="/adminsignup" element={<AdminSignup />} />
-        
+
         {/* Admin Pages*/}
         <Route path="/adminhomepage" element={<Adminhomepage />} />
-
-
       </Routes>
-      <WhatsAppChat />
+      {!isAdminRoute && <WhatsAppChat />}
+    </>
+  )
+}
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   )
 }
