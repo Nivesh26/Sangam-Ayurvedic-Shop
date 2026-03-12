@@ -1,5 +1,6 @@
 import profile from "../assets/react.svg";
 import { Link } from 'react-router-dom';
+
 const Header = () => {
   return (
     <div className="w-full bg-white shadow-md">

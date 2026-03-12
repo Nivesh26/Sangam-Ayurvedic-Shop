@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../User Components/Header.tsx'
 import Footer from '../User Components/Footer.tsx'
+import { useCart } from '../context/CartContext'
 import productImage from '../assets/176775850311hn1.webp'
 import prdoductImage2 from '../assets/SpecialChyawanprash.webp'
 import prdoductImage3 from '../assets/SoanPapdi.webp'
@@ -12,6 +13,7 @@ const Shop = () => {
   const [minPrice, setMinPrice] = useState<number>(0)
   const [maxPrice, setMaxPrice] = useState<number>(1000)
   const maxPriceLimit = 10000
+  const { addItem } = useCart()
 
   const products = [
 
@@ -61,9 +63,14 @@ const Shop = () => {
 
   const categories = ['All', 'Digestive Care', 'Immunity Boosters', 'Herbal Supplements', 'Skin & Hair Care', 'Oils & Massage', 'Ayurvedic Medicines']
 
-  const handleAddToCart = (productId: number) => {
-    console.log('Added to cart:', productId)
-    // Add to cart logic here
+  const handleAddToCart = (product: (typeof products)[0]) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
+    })
   }
 
   // Filter products based on selected category and price range
@@ -212,7 +219,7 @@ const Shop = () => {
 
                       {/* Add to Cart Button */}
                       <button
-                        onClick={() => handleAddToCart(product.id)}
+                        onClick={() => handleAddToCart(product)}
                         className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-all duration-300 text-sm font-medium"
                       >
                         Add to Cart

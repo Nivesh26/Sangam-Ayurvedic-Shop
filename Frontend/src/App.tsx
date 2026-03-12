@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
 import Homepage from './User Pages/Homepage'
 import Shop from './User Pages/Shop'
 import New from './User Pages/New'
@@ -53,7 +54,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <BrowserRouter>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </BrowserRouter>
   )
 }

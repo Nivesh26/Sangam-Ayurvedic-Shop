@@ -3,6 +3,7 @@ import { useLocation, Link } from 'react-router-dom'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
 import SuggestionProduct from '../User Components/SuggestionProduct'
+import { useCart } from '../context/CartContext'
 import productImage from '../assets/176775850311hn1.webp'
 
 // Single default product when page is opened directly (no state from shop)
@@ -40,14 +41,22 @@ const StarRating = ({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md
 
 const Productdetail = () => {
   const location = useLocation()
-  const productFromShop = location.state?.product as { name: string; price: number; image: string; category: string; description?: string } | undefined
+  const productFromShop = location.state?.product as { id?: number; name: string; price: number; image: string; category: string; description?: string } | undefined
   const product = productFromShop ?? DEFAULT_PRODUCT
   const description = product.description ?? 'Authentic Ayurvedic product from Sangam Ayurvedic.'
 
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
+  const { addItem } = useCart()
 
   const handleAddToCart = () => {
-    console.log('Added to cart:', product.name)
+    addItem({
+      id: 'id' in product ? product.id : undefined,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      description
+    })
   }
 
   const handleReviewSubmit = (e: React.FormEvent) => {
