@@ -1,14 +1,126 @@
+import { useState } from 'react'
 import Navbar from '../AdminComponent/Navbar'
 
 const Settings = () => {
+  const [storeClosed, setStoreClosed] = useState(false)
+  const [notifications, setNotifications] = useState({
+    newOrders: true,
+    lowStock: true,
+    newMessages: true,
+    weeklyReport: false
+  })
+
+  const toggleNotification = (key: keyof typeof notifications) => {
+    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
       <main className="ml-64 min-h-screen p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Settings</h1>
-        <p className="text-gray-600 mb-6">Manage your store settings and preferences.</p>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <p className="text-gray-500 text-sm">Settings options will appear here.</p>
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Manage your store details and preferences.</p>
+        </header>
+
+        <div className="space-y-6">
+          {/* Notifications */}
+          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
+                <p className="text-sm text-gray-500">Choose which email alerts you receive.</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                { key: 'newOrders' as const, label: 'New orders', desc: 'Get notified when a new order is placed.' },
+                { key: 'lowStock' as const, label: 'Low stock alerts', desc: 'Alert when product quantity is low.' },
+                { key: 'newMessages' as const, label: 'New messages', desc: 'Notify when a customer sends a message.' },
+                { key: 'weeklyReport' as const, label: 'Weekly report', desc: 'Summary of sales and orders every week.' }
+              ].map(({ key, label, desc }) => (
+                <div key={key} className="flex items-start justify-between gap-4 py-3 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p className="font-medium text-gray-800">{label}</p>
+                    <p className="text-sm text-gray-500 mt-0.5">{desc}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={notifications[key]}
+                    onClick={() => toggleNotification(key)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                      notifications[key] ? 'bg-green-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${
+                        notifications[key] ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
+                      style={{ marginTop: 2 }}
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Security */}
+          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Security</h2>
+                <p className="text-sm text-gray-500">Manage your admin account password.</p>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-600 mb-4">Change your admin login password to keep your account secure.</p>
+              <button
+                type="button"
+                className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Change password
+              </button>
+            </div>
+          </section>
+
+          {/* Temporary close store */}
+          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Temporary close store</h2>
+                <p className="text-sm text-gray-500">When enabled, customers will see a closed message and cannot place orders.</p>
+              </div>
+            </div>
+            <div className="p-6">
+              <button
+                type="button"
+                onClick={() => setStoreClosed((v) => !v)}
+                className={
+                  storeClosed
+                    ? 'w-full px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'
+                    : 'w-full px-5 py-2.5 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors'
+                }
+              >
+                {storeClosed ? 'Open store' : 'Close store'}
+              </button>
+            </div>
+          </section>
         </div>
       </main>
     </div>
