@@ -108,7 +108,7 @@ const Productdetail = () => {
                 </button>
                 <Link
                   to="/shop"
-                  className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center justify-center border border-green-600 text-green-600 px-6 py-3 rounded-lg font-medium hover:bg-green-50 transition-colors"
                 >
                   Continue Shopping
                 </Link>

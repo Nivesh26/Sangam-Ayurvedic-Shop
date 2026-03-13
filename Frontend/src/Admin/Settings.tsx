@@ -131,7 +131,7 @@ const Settings = () => {
                 <button
                   type="button"
                   onClick={() => setShowChangePassword(true)}
-                  className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  className="px-5 py-2.5 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
                 >
                   Change password
                 </button>
@@ -199,7 +199,7 @@ const Settings = () => {
                         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
                         setPasswordError('')
                       }}
-                      className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                      className="px-5 py-2.5 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
                     >
                       Cancel
                     </button>
@@ -230,7 +230,7 @@ const Settings = () => {
                 className={
                   storeClosed
                     ? 'w-full px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'
-                    : 'w-full px-5 py-2.5 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors'
+                    : 'w-full px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'
                 }
               >
                 {storeClosed ? 'Open store' : 'Close store'}

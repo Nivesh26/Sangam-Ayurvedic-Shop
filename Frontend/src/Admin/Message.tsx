@@ -239,13 +239,13 @@ const Message = () => {
                         </button>
                         <button
                           onClick={() => markUnread(selected.id)}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-green-600 text-green-600 rounded-lg text-sm font-medium hover:bg-green-50 transition-colors"
                         >
                           Mark unread
                         </button>
                         <button
                           onClick={() => deleteMessage(selected.id)}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white border border-red-600 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white border border-green-600 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
                           Delete
                         </button>

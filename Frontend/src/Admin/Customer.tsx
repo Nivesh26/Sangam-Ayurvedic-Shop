@@ -70,13 +70,13 @@ const Customer = () => {
                             <span className="text-xs text-gray-500">Delete?</span>
                             <button
                               onClick={() => handleDelete(c.id)}
-                              className="text-red-600 hover:text-red-700 text-sm font-medium"
+                              className="text-green-600 hover:text-green-700 text-sm font-medium"
                             >
                               Yes
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(null)}
-                              className="text-gray-600 hover:text-gray-700 text-sm font-medium"
+                              className="text-green-600 hover:text-green-700 text-sm font-medium"
                             >
                               No
                             </button>
@@ -84,7 +84,7 @@ const Customer = () => {
                         ) : (
                           <button
                             onClick={() => setDeleteConfirmId(c.id)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-green-600 hover:bg-green-50 rounded-lg text-sm font-medium transition-colors"
                             title="Delete customer"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

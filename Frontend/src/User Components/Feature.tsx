@@ -36,7 +36,7 @@ const Feature = () => {
                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 text-center group"
               >
                 <div className="flex justify-center mb-4">
-                  <div className="bg-blue-100 rounded-full p-4 group-hover:bg-blue-600 transition-colors duration-300">
+                  <div className="bg-green-100 rounded-full p-4 group-hover:bg-green-600 transition-colors duration-300">
                     <IconComponent className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors duration-300" />
                   </div>
                 </div>

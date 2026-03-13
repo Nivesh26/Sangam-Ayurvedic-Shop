@@ -213,7 +213,7 @@ const New = () => {
                       {/* Add to Cart Button */}
                       <button
                         onClick={() => handleAddToCart(product.id)}
-                        className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-all duration-300 text-sm font-medium"
+                        className="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-all duration-300 text-sm font-medium"
                       >
                         Add to Cart
                       </button>
