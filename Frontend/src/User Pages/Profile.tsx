@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
-import { getUser, clearAuth, deleteAccount, updateProfile, setUser } from '../api/auth'
+import { getUser, clearAuth, deleteAccount, updateProfile, setUser, updatePassword } from '../api/auth'
 
 const defaultProfile = {
   fullName: 'Sita Sharma',
@@ -51,6 +51,7 @@ const Profile = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -90,7 +91,7 @@ const Profile = () => {
     setPasswordError('')
   }
 
-  const handleChangePasswordSubmit = (e: React.FormEvent) => {
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordError('New passwords do not match')
@@ -101,10 +102,21 @@ const Profile = () => {
       return
     }
     setPasswordError('')
-    setPasswordSuccess(true)
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
-    setShowChangePassword(false)
-    setTimeout(() => setPasswordSuccess(false), 3000)
+    setChangingPassword(true)
+    try {
+      await updatePassword(passwordForm.currentPassword, passwordForm.newPassword)
+      setPasswordSuccess(true)
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setShowChangePassword(false)
+      toast.success('Password updated successfully.')
+      setTimeout(() => setPasswordSuccess(false), 3000)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update password'
+      setPasswordError(message)
+      toast.error(message)
+    } finally {
+      setChangingPassword(false)
+    }
   }
 
   const handleDeleteAccount = async () => {
@@ -410,21 +422,23 @@ const Profile = () => {
                   <div className="flex gap-3 pt-1">
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+                      disabled={changingPassword}
+                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Update password
+                      {changingPassword ? 'Updating…' : 'Update password'}
                     </button>
                     <button
                       type="button"
+                      disabled={changingPassword}
                       onClick={() => {
                         setShowChangePassword(false)
                         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
                         setPasswordError('')
                       }}
-                      className="px-5 py-2.5 border border-green-600 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors"
+                      className="px-5 py-2.5 border border-green-600 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       Cancel
                     </button>

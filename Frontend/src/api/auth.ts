@@ -85,6 +85,19 @@ export async function updateProfile(data: { fullName: string; phoneNumber: strin
   return result
 }
 
+export async function updatePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  const token = sessionStorage.getItem(AUTH_TOKEN_KEY)
+  if (!token) throw new Error('Not logged in.')
+  const res = await fetch(`${API_URL}/api/auth/profile/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.message || 'Failed to update password.')
+  return data
+}
+
 export async function deleteAccount(): Promise<{ success: boolean; message: string }> {
   const token = sessionStorage.getItem(AUTH_TOKEN_KEY)
   if (!token) throw new Error('Not logged in.')
