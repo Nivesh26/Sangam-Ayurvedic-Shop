@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
 import { toast } from 'react-toastify'
@@ -7,6 +7,8 @@ import { useCart } from '../context/CartContext'
 import { getProducts, productImageUrl, type ProductItem } from '../api/products'
 
 const Shop = () => {
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get('q') ?? ''
   const [products, setProducts] = useState<ProductItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
@@ -42,7 +44,11 @@ const Shop = () => {
   const filteredProducts = products.filter((product) => {
     const categoryMatch = selectedCategory === 'All' || product.category === selectedCategory
     const priceMatch = product.price >= minPrice && product.price <= maxPrice
-    return categoryMatch && priceMatch
+    const searchMatch = !searchQuery.trim() ||
+      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    return categoryMatch && priceMatch && searchMatch
   })
 
   return (
@@ -53,6 +59,11 @@ const Shop = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Shop</h1>
+            {searchQuery && (
+              <p className="mt-1 text-gray-600 text-sm">
+                Search results for &quot;{searchQuery}&quot; — {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col lg:flex-row gap-6">

@@ -26,7 +26,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/new" className="text-gray-400 hover:text-red-400 transition-colors">
-                  New Arrivals
+                  New
                 </Link>
               </li>
               <li>
@@ -40,7 +40,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <span className="text-gray-400">Contact Us</span>
+                <Link to="/contact" className="text-gray-400 hover:text-red-400 transition-colors">
+                  Contact Us
+                </Link>
               </li>
             </ul>
           </div>

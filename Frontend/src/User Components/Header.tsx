@@ -1,12 +1,70 @@
-import { Link, NavLink } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { FaUser, FaShoppingCart } from 'react-icons/fa'
 import { getUser } from '../api/auth'
+import { getProducts, productImageUrl, type ProductItem } from '../api/products'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `font-medium transition-colors ${isActive ? 'text-red-600' : 'text-gray-700 hover:text-red-600'}`
 
+const MAX_SUGGESTIONS = 6
+
 const Header = () => {
   const user = getUser()
+  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [products, setProducts] = useState<ProductItem[]>([])
+  const [productsLoaded, setProductsLoaded] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!productsLoaded && searchQuery.trim().length >= 1) {
+      getProducts()
+        .then((res) => {
+          setProducts(res.products || [])
+          setProductsLoaded(true)
+        })
+        .catch(() => setProducts([]))
+    }
+  }, [searchQuery, productsLoaded])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const q = searchQuery.trim().toLowerCase()
+  const suggestions = !q
+    ? []
+    : products.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q)
+      ).slice(0, MAX_SUGGESTIONS)
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    setShowSuggestions(false)
+    if (q) {
+      navigate(`/shop?q=${encodeURIComponent(q)}`)
+    } else {
+      navigate('/shop')
+    }
+  }
+
+  const handleSuggestionClick = (productId: string) => {
+    setShowSuggestions(false)
+    setSearchQuery('')
+    navigate(`/product/${productId}`)
+  }
 
   return (
     <div className="w-full bg-white shadow-md">
@@ -25,39 +83,86 @@ const Header = () => {
         </ul>
 
         <div className="hidden md:flex items-center space-x-3">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="border border-gray-300 rounded-full px-5 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all w-64"
-            />
-            <button
-              type="button"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-600 transition-colors"
-              aria-label="Search"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
+          <div ref={searchRef} className="relative">
+            <form onSubmit={handleSearch}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => searchQuery.trim() && setShowSuggestions(true)}
+                placeholder="Search products..."
+                className="border border-gray-300 rounded-full px-5 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all w-64"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors"
+                aria-label="Search"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </form>
+            {showSuggestions && searchQuery.trim() && (
+              <div className="absolute top-full left-0 right-0 mt-1 py-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+                {suggestions.length === 0 ? (
+                  <p className="px-4 py-3 text-gray-500 text-sm">No products match your search.</p>
+                ) : (
+                  <ul className="divide-y divide-gray-100">
+                    {suggestions.map((p) => (
+                      <li key={p._id}>
+                        <button
+                          type="button"
+                          onClick={() => handleSuggestionClick(p._id)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
+                            {(p.imageUrls || [])[0] ? (
+                              <img
+                                src={productImageUrl((p.imageUrls || [])[0])}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">—</div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-gray-900 truncate">{p.name}</p>
+                            <p className="text-sm text-gray-500">Rs. {p.price}</p>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
 
           {user ? (
             <div className="flex items-center gap-4">
-              <Link
+              <NavLink
                 to="/cart"
-                className="p-2 text-gray-600 hover:text-green-600 transition-colors rounded-lg hover:bg-gray-100"
+                className={({ isActive }) =>
+                  `p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
+                }
                 aria-label="Cart"
               >
                 <FaShoppingCart className="w-5 h-5" />
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/profile"
-                className="p-2 text-gray-600 hover:text-green-600 transition-colors rounded-lg hover:bg-gray-100"
+                className={({ isActive }) =>
+                  `p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
+                }
                 aria-label="Profile"
               >
                 <FaUser className="w-5 h-5" />
-              </Link>
+              </NavLink>
             </div>
           ) : (
             <Link

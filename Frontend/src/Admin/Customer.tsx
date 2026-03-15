@@ -7,8 +7,19 @@ const Customer = () => {
   const [customers, setCustomers] = useState<CustomerItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  const filteredCustomers = searchQuery.trim()
+    ? customers.filter(
+        (c) =>
+          c.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.phoneNumber?.includes(searchQuery) ||
+          c.address?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : customers
 
   const fetchCustomers = async () => {
     setLoading(true)
@@ -46,11 +57,27 @@ const Customer = () => {
     <div className="min-h-screen bg-gray-100">
       <Navbar />
       <main className="ml-64 min-h-screen p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
-          <p className="text-sm text-gray-500">
-            {loading ? 'Loading…' : `${customers.length} customer${customers.length !== 1 ? 's' : ''}`}
-          </p>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
+            <p className="text-sm text-gray-500">
+              {loading ? 'Loading…' : `${filteredCustomers.length} of ${customers.length} customer${customers.length !== 1 ? 's' : ''}`}
+            </p>
+          </div>
+          <div className="relative max-w-md">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, email, phone or address…"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            />
+          </div>
         </div>
 
         {error && (
@@ -79,14 +106,14 @@ const Customer = () => {
                       Loading customers…
                     </td>
                   </tr>
-                ) : customers.length === 0 ? (
+                ) : filteredCustomers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-gray-500">
-                      No customers yet.
+                      {customers.length === 0 ? 'No customers yet.' : 'No customers match your search.'}
                     </td>
                   </tr>
                 ) : (
-                  customers.map((c) => (
+                  filteredCustomers.map((c) => (
                     <tr key={c._id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                       <td className="py-3 px-4">
                         <span className="font-medium text-gray-800">{c.fullName}</span>
