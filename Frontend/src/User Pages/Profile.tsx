@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
-import { getUser, clearAuth, deleteAccount } from '../api/auth'
+import { getUser, clearAuth, deleteAccount, updateProfile, setUser } from '../api/auth'
 
 const defaultProfile = {
   fullName: 'Sita Sharma',
   email: 'sita@example.com',
-  phoneNumber: '+977 9801001001'
+  phoneNumber: '+977 9801001001',
+  address: ''
 }
 
 const Profile = () => {
@@ -17,15 +18,17 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState(() =>
     savedUser
-      ? { fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber }
+      ? { fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber, address: (savedUser as { address?: string }).address || '' }
       : defaultProfile
   )
   const [form, setForm] = useState(profile)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (savedUser) {
-      setProfile({ fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber })
-      setForm({ fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber })
+      const addr = (savedUser as { address?: string }).address || ''
+      setProfile({ fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber, address: addr })
+      setForm({ fullName: savedUser.fullName, email: savedUser.email, phoneNumber: savedUser.phoneNumber, address: addr })
     }
   }, [])
 
@@ -49,16 +52,31 @@ const Profile = () => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     const nextValue = name === 'phoneNumber' ? value.replace(/\D/g, '').slice(0, 10) : value
     setForm((prev) => ({ ...prev, [name]: nextValue }))
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    setProfile({ ...form })
-    setIsEditing(false)
+    setSaving(true)
+    try {
+      const res = await updateProfile({
+        fullName: form.fullName,
+        phoneNumber: form.phoneNumber,
+        address: form.address || ''
+      })
+      const updated = { ...form, ...res.user }
+      setProfile(updated)
+      setUser(res.user)
+      setIsEditing(false)
+      toast.success('Profile updated.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update profile')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCancel = () => {
@@ -174,10 +192,11 @@ const Profile = () => {
                       id="email"
                       name="email"
                       value={form.email}
-                      onChange={handleChange}
-                      className={inputBase}
+                      readOnly
+                      className={`${inputBase} bg-gray-100 cursor-not-allowed`}
                       placeholder="your@email.com"
                     />
+                    <p className="mt-1 text-xs text-gray-500">Email cannot be changed.</p>
                   </div>
                   <div>
                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1.5">Phone number</label>
@@ -194,15 +213,28 @@ const Profile = () => {
                       placeholder="10 digits only"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      value={form.address || ''}
+                      onChange={handleChange}
+                      rows={3}
+                      className={`${inputBase} resize-none`}
+                      placeholder="Your address (optional)"
+                    />
+                  </div>
                   <div className="flex gap-3 pt-1">
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 flex-1 justify-center bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+                      disabled={saving}
+                      className="inline-flex items-center gap-2 flex-1 justify-center bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Save changes
+                      {saving ? 'Saving…' : 'Save changes'}
                     </button>
                     <button
                       type="button"
@@ -226,6 +258,10 @@ const Profile = () => {
                   <div className="py-3 border-b border-gray-100 last:border-0">
                     <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">Phone</dt>
                     <dd className="mt-1.5 text-gray-900">{profile.phoneNumber}</dd>
+                  </div>
+                  <div className="py-3 border-b border-gray-100 last:border-0">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">Address</dt>
+                    <dd className="mt-1.5 text-gray-900">{profile.address?.trim() || '—'}</dd>
                   </div>
                 </dl>
               )}

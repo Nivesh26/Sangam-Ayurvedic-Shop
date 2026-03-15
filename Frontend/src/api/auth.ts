@@ -58,7 +58,7 @@ export function getAuthToken(): string | null {
   return sessionStorage.getItem(AUTH_TOKEN_KEY)
 }
 
-export function setUser(user: { id: string; fullName: string; email: string; phoneNumber: string; role: string }) {
+export function setUser(user: { id: string; fullName: string; email: string; phoneNumber: string; role: string; address?: string }) {
   sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
 }
 
@@ -70,6 +70,19 @@ export function getUser() {
 export function clearAuth() {
   sessionStorage.removeItem(AUTH_TOKEN_KEY)
   sessionStorage.removeItem(AUTH_USER_KEY)
+}
+
+export async function updateProfile(data: { fullName: string; phoneNumber: string; address?: string }): Promise<{ success: boolean; message: string; user: { id: string; fullName: string; email: string; phoneNumber: string; address?: string; role: string } }> {
+  const token = sessionStorage.getItem(AUTH_TOKEN_KEY)
+  if (!token) throw new Error('Not logged in.')
+  const res = await fetch(`${API_URL}/api/auth/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  })
+  const result = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(result?.message || 'Failed to update profile.')
+  return result
 }
 
 export async function deleteAccount(): Promise<{ success: boolean; message: string }> {

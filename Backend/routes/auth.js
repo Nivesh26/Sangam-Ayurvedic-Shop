@@ -124,6 +124,45 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile - update logged-in user's personal info (protected)
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { fullName, phoneNumber, address } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    if (fullName !== undefined) user.fullName = fullName.trim();
+    if (phoneNumber !== undefined) {
+      const digits = String(phoneNumber).replace(/\D/g, '');
+      if (digits.length !== 10) {
+        return res.status(400).json({ success: false, message: 'Phone number must be exactly 10 digits.' });
+      }
+      user.phoneNumber = digits;
+    }
+    if (address !== undefined) user.address = address.trim();
+    await user.save();
+    res.json({
+      success: true,
+      message: 'Profile updated.',
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        address: user.address || '',
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error while updating profile.',
+    });
+  }
+});
+
 // DELETE /api/auth/account - delete logged-in user's account (protected)
 router.delete('/account', protect, async (req, res) => {
   try {
