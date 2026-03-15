@@ -1,85 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 import Navbar from '../AdminComponent/Navbar'
+import { getOrders, updateOrderStatus as updateOrderStatusAPI, type OrderFromAPI } from '../api/orders'
 
 type OrderItem = {
   productName: string
   quantity: number
   price: number
-  imageUrl?: string
 }
 
 type Order = {
+  _id: string
   id: string
   customerName: string
   customerEmail: string
   date: string
-  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled'
+  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered'
   items: OrderItem[]
   total: number
 }
 
-// Static mock orders
-const MOCK_ORDERS: Order[] = [
-  {
-    id: 'ORD-001',
-    customerName: 'Ram Kumar',
-    customerEmail: 'ram.kumar@example.com',
-    date: '2025-03-14',
-    status: 'Confirmed',
-    total: 2450,
-    items: [
-      { productName: 'Chyawanprash 500g', quantity: 2, price: 450 },
-      { productName: 'Triphala Tablets', quantity: 1, price: 350 },
-      { productName: 'Ashwagandha Powder', quantity: 1, price: 1200 },
-    ],
-  },
-  {
-    id: 'ORD-002',
-    customerName: 'Sita Sharma',
-    customerEmail: 'sita.sharma@example.com',
-    date: '2025-03-13',
-    status: 'Shipped',
-    total: 1890,
-    items: [
-      { productName: 'Digestive Care Syrup', quantity: 1, price: 590 },
-      { productName: 'Herbal Tea - Tulsi', quantity: 3, price: 433 },
-    ],
-  },
-  {
-    id: 'ORD-003',
-    customerName: 'Anita Gurung',
-    customerEmail: 'anita.g@example.com',
-    date: '2025-03-12',
-    status: 'Delivered',
-    total: 3200,
-    items: [
-      { productName: 'Immunity Booster Capsules', quantity: 2, price: 800 },
-      { productName: 'Aloe Vera Gel', quantity: 1, price: 650 },
-      { productName: 'Sesame Massage Oil', quantity: 1, price: 950 },
-    ],
-  },
-  {
-    id: 'ORD-004',
-    customerName: 'Bikash Thapa',
-    customerEmail: 'bikash.t@example.com',
-    date: '2025-03-15',
-    status: 'Pending',
-    total: 750,
-    items: [
-      { productName: 'Ayurvedic Toothpaste', quantity: 2, price: 375 },
-    ],
-  },
-]
+function mapApiOrderToOrder(api: OrderFromAPI): Order {
+  return {
+    _id: api._id,
+    id: api.id,
+    customerName: api.customerName,
+    customerEmail: api.customerEmail,
+    date: api.date,
+    status: api.status,
+    items: api.items,
+    total: api.total,
+  }
+}
 
 const statusColors: Record<Order['status'], string> = {
   Pending: 'bg-amber-100 text-amber-800',
   Confirmed: 'bg-blue-100 text-blue-800',
   Shipped: 'bg-indigo-100 text-indigo-800',
   Delivered: 'bg-green-100 text-green-800',
-  Cancelled: 'bg-red-100 text-red-800',
 }
 
-// Status can only move forward: Pending → Confirmed → Shipped → Delivered (admin cannot change back)
 const STATUS_FLOW: Order['status'][] = ['Pending', 'Confirmed', 'Shipped', 'Delivered']
 
 function getAllowedStatusOptions(currentStatus: Order['status']): Order['status'][] {
@@ -88,12 +48,39 @@ function getAllowedStatusOptions(currentStatus: Order['status']): Order['status'
 }
 
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>(() => [...MOCK_ORDERS])
-  const [expandedId, setExpandedId] = useState<string | null>(MOCK_ORDERS[0]?.id ?? null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const updateOrderStatus = (orderId: string, status: Order['status']) => {
-    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status } : o)))
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError('')
+    getOrders()
+      .then((res) => {
+        if (!cancelled) setOrders((res.orders || []).map(mapApiOrderToOrder))
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load orders')
+        toast.error(err instanceof Error ? err.message : 'Failed to load orders')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+    const order = orders.find((o) => o._id === orderId || o.id === orderId)
+    if (!order) return
+    try {
+      await updateOrderStatusAPI(order._id, status)
+      setOrders((prev) => prev.map((o) => (o._id === order._id ? { ...o, status } : o)))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update status')
+    }
   }
 
   const q = searchQuery.trim().toLowerCase()
@@ -115,6 +102,10 @@ const Orders = () => {
           <h1 className="text-2xl font-bold text-gray-800">Orders</h1>
           <p className="text-gray-500 text-sm mt-0.5">View and manage customer orders</p>
         </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3">{error}</div>
+        )}
 
         <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4">
@@ -152,7 +143,12 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrders.map((order) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">Loading orders…</td>
+                  </tr>
+                ) : (
+                filteredOrders.map((order) => (
                   <React.Fragment key={order.id}>
                     <tr className="hover:bg-gray-50/50">
                       <td className="px-6 py-4">
@@ -168,7 +164,7 @@ const Orders = () => {
                       <td className="px-6 py-4">
                         <select
                           value={order.status}
-                          onChange={(e) => updateOrderStatus(order.id, e.target.value as Order['status'])}
+                          onChange={(e) => updateOrderStatus(order._id, e.target.value as Order['status'])}
                           className={`min-w-[7rem] px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer ${statusColors[order.status]}`}
                         >
                           {getAllowedStatusOptions(order.status).map((s) => (
@@ -240,7 +236,8 @@ const Orders = () => {
                       </tr>
                     )}
                   </React.Fragment>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>
