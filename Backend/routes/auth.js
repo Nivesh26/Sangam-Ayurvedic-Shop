@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -27,6 +28,14 @@ router.post('/signup', async (req, res) => {
       });
     }
 
+    const digitsOnly = String(phoneNumber).replace(/\D/g, '');
+    if (digitsOnly.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number must be exactly 10 digits.',
+      });
+    }
+
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({
@@ -38,7 +47,7 @@ router.post('/signup', async (req, res) => {
     const user = await User.create({
       fullName: fullName.trim(),
       email: email.toLowerCase().trim(),
-      phoneNumber: phoneNumber.trim(),
+      phoneNumber: digitsOnly,
       password,
       role: 'user',
     });
@@ -111,6 +120,24 @@ router.post('/login', async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Server error during login.',
+    });
+  }
+});
+
+// DELETE /api/auth/account - delete logged-in user's account (protected)
+router.delete('/account', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    await User.findByIdAndDelete(req.userId);
+    res.json({ success: true, message: 'Account deleted successfully.' });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error while deleting account.',
     });
   }
 });

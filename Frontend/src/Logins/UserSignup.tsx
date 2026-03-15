@@ -21,13 +21,17 @@ const UserSignup = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    let nextValue = value
+    if (name === 'phoneNumber') {
+      nextValue = value.replace(/\D/g, '').slice(0, 10)
+    }
+    setFormData((prev) => ({ ...prev, [name]: nextValue }))
     setError('')
     if (name === 'confirmPassword' && formData.password) {
-      setPasswordMatch(value === formData.password)
+      setPasswordMatch(nextValue === formData.password)
     }
     if (name === 'password' && formData.confirmPassword) {
-      setPasswordMatch(value === formData.confirmPassword)
+      setPasswordMatch(nextValue === formData.confirmPassword)
     }
   }
 
@@ -124,7 +128,10 @@ const UserSignup = () => {
                     value={formData.phoneNumber}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your phone number"
+                    maxLength={10}
+                    inputMode="numeric"
+                    pattern="[0-9]{10}"
+                    placeholder="10 digits only"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors placeholder-gray-400"
                   />
                 </div>

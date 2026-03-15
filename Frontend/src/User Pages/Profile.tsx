@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
-import { getUser, clearAuth } from '../api/auth'
+import { getUser, clearAuth, deleteAccount } from '../api/auth'
 
 const defaultProfile = {
   fullName: 'Sita Sharma',
@@ -41,13 +41,16 @@ const Profile = () => {
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    const nextValue = name === 'phoneNumber' ? value.replace(/\D/g, '').slice(0, 10) : value
+    setForm((prev) => ({ ...prev, [name]: nextValue }))
   }
 
   const handleSave = (e: React.FormEvent) => {
@@ -84,9 +87,19 @@ const Profile = () => {
     setTimeout(() => setPasswordSuccess(false), 3000)
   }
 
-  const handleDeleteAccount = () => {
-    setShowDeleteConfirm(false)
-    window.location.href = '/'
+  const handleDeleteAccount = async () => {
+    setDeleteError('')
+    setDeleting(true)
+    try {
+      await deleteAccount()
+      clearAuth()
+      setShowDeleteConfirm(false)
+      navigate('/')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account.')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const inputBase =
@@ -169,8 +182,11 @@ const Profile = () => {
                       name="phoneNumber"
                       value={form.phoneNumber}
                       onChange={handleChange}
+                      maxLength={10}
+                      inputMode="numeric"
+                      pattern="[0-9]{10}"
                       className={inputBase}
-                      placeholder="+977 9800000000"
+                      placeholder="10 digits only"
                     />
                   </div>
                   <div className="flex gap-3 pt-1">
@@ -447,18 +463,23 @@ const Profile = () => {
                 <p className="text-sm text-gray-600 mb-6">
                   Your account and all associated data will be permanently removed. You will need to sign up again to use our services.
                 </p>
+                {deleteError && (
+                  <p className="text-sm text-red-600 mb-4">{deleteError}</p>
+                )}
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={handleDeleteAccount}
-                    className="flex-1 inline-flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition-colors"
+                    disabled={deleting}
+                    className="flex-1 inline-flex items-center justify-center gap-2 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    Yes, delete my account
+                    {deleting ? 'Deleting…' : 'Yes, delete my account'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="flex-1 py-3 border border-green-600 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors"
+                    onClick={() => { setShowDeleteConfirm(false); setDeleteError('') }}
+                    disabled={deleting}
+                    className="flex-1 py-3 border border-gray-400 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
                   >
                     Cancel
                   </button>

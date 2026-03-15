@@ -40,24 +40,46 @@ export async function signup(fullName: string, email: string, phoneNumber: strin
   return data
 }
 
+// Session storage: login lasts only until tab/browser is closed (no persistence across tabs)
+const AUTH_TOKEN_KEY = 'token'
+const AUTH_USER_KEY = 'user'
+
+// Clear any legacy auth from localStorage so session is tab-only
+if (typeof localStorage !== 'undefined') {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+}
+
 export function setAuthToken(token: string) {
-  localStorage.setItem('token', token)
+  sessionStorage.setItem(AUTH_TOKEN_KEY, token)
 }
 
 export function getAuthToken(): string | null {
-  return localStorage.getItem('token')
+  return sessionStorage.getItem(AUTH_TOKEN_KEY)
 }
 
 export function setUser(user: { id: string; fullName: string; email: string; phoneNumber: string; role: string }) {
-  localStorage.setItem('user', JSON.stringify(user))
+  sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
 }
 
 export function getUser() {
-  const u = localStorage.getItem('user')
+  const u = sessionStorage.getItem(AUTH_USER_KEY)
   return u ? JSON.parse(u) : null
 }
 
 export function clearAuth() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
+  sessionStorage.removeItem(AUTH_TOKEN_KEY)
+  sessionStorage.removeItem(AUTH_USER_KEY)
+}
+
+export async function deleteAccount(): Promise<{ success: boolean; message: string }> {
+  const token = sessionStorage.getItem(AUTH_TOKEN_KEY)
+  if (!token) throw new Error('Not logged in.')
+  const res = await fetch(`${API_URL}/api/auth/account`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.message || 'Failed to delete account.')
+  return data
 }
