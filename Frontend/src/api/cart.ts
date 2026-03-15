@@ -12,6 +12,7 @@ export type CartItemFromAPI = {
     imageUrls?: string[]
     category?: string
     description?: string
+    stock?: number
   } | null
   quantity: number
 }
@@ -42,8 +43,8 @@ export async function saveCart(items: CartItemForAPI[]): Promise<{ success: bool
   return data
 }
 
-/** Map API cart entries to CartItem shape (id, name, price, image, quantity) */
-export function mapCartToItems(cart: CartItemFromAPI[]): { id: string; name: string; price: number; image: string; quantity: number }[] {
+/** Map API cart entries to CartItem shape (id, name, price, image, quantity, stock?) */
+export function mapCartToItems(cart: CartItemFromAPI[]): { id: string; name: string; price: number; image: string; quantity: number; stock?: number }[] {
   return cart
     .filter((entry) => entry.product)
     .map((entry) => ({
@@ -52,5 +53,6 @@ export function mapCartToItems(cart: CartItemFromAPI[]): { id: string; name: str
       price: entry.product!.price,
       image: (entry.product!.imageUrls || [])[0] ? productImageUrl((entry.product!.imageUrls || [])[0]) : '',
       quantity: entry.quantity,
+      ...(entry.product!.stock !== undefined && { stock: entry.product!.stock }),
     }))
 }

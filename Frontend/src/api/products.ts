@@ -7,6 +7,7 @@ export type ProductItem = {
   price: number
   category: string
   imageUrls: string[]
+  stock?: number
   createdAt?: string
 }
 

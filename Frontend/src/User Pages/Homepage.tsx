@@ -15,7 +15,12 @@ const Homepage = () => {
   useEffect(() => {
     let cancelled = false
     getProducts()
-      .then((res) => { if (!cancelled) setProducts(res.products || []) })
+      .then((res) => {
+        if (!cancelled) {
+          const all = res.products || []
+          setProducts(all.filter((p) => (p.stock ?? 0) > 0))
+        }
+      })
       .catch(() => { if (!cancelled) setProducts([]) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }

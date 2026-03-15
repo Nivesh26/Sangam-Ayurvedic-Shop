@@ -30,6 +30,11 @@ const productSchema = new mongoose.Schema(
         message: 'Maximum 4 images allowed.',
       },
     },
+    stock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

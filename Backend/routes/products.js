@@ -51,7 +51,7 @@ router.post('/', protect, requireAdmin, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, stock } = req.body;
     if (!name || price == null || !category) {
       return res.status(400).json({ success: false, message: 'Name, price and category are required.' });
     }
@@ -59,12 +59,14 @@ router.post('/', protect, requireAdmin, (req, res, next) => {
     if (imageUrls.length > 4) {
       return res.status(400).json({ success: false, message: 'Maximum 4 images allowed.' });
     }
+    const stockNum = stock !== undefined && stock !== '' ? Math.max(0, parseInt(String(stock), 10) || 0) : 0;
     const product = await Product.create({
       name: name.trim(),
       description: (description || '').trim(),
       price: Number(price),
       category: category.trim(),
       imageUrls,
+      stock: stockNum,
     });
     res.status(201).json({ success: true, product });
   } catch (error) {
@@ -81,7 +83,7 @@ router.put('/:id', protect, requireAdmin, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, category, existingImageUrls } = req.body;
+    const { name, description, price, category, existingImageUrls, stock } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
@@ -90,6 +92,7 @@ router.put('/:id', protect, requireAdmin, (req, res, next) => {
     if (description !== undefined) product.description = description.trim();
     if (price !== undefined) product.price = Number(price);
     if (category !== undefined) product.category = category.trim();
+    if (stock !== undefined && stock !== '') product.stock = Math.max(0, parseInt(String(stock), 10) || 0);
     const newPaths = (req.files || []).map((f) => `/uploads/products/${f.filename}`);
     let kept = [];
     try {

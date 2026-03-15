@@ -10,6 +10,7 @@ export type CartProduct = {
   image: string | { default?: string }
   category?: string
   description?: string
+  stock?: number
 }
 
 export type CartItem = {
@@ -18,6 +19,7 @@ export type CartItem = {
   price: number
   image: string
   quantity: number
+  stock?: number
 }
 
 const CART_STORAGE_KEY = 'nivesh-cart'
@@ -108,18 +110,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items])
 
   const addItem = useCallback((product: CartProduct, quantity = 1) => {
+    const stock = product.stock ?? undefined
+    if (stock !== undefined && stock <= 0) return
     const id = getCartItemId(product)
     const image = getImageUrl(product.image)
     setItems((prev) => {
       const existing = prev.find((i) => i.id === id)
+      const addQty = stock !== undefined
+        ? Math.min(quantity, Math.max(0, stock - (existing?.quantity ?? 0)))
+        : quantity
+      if (addQty < 1 && !existing) return prev
       if (existing) {
+        const newQty = stock !== undefined
+          ? Math.min(existing.quantity + quantity, stock)
+          : existing.quantity + quantity
         return prev.map((i) =>
-          i.id === id ? { ...i, quantity: i.quantity + quantity } : i
+          i.id === id ? { ...i, quantity: newQty, ...(stock !== undefined && { stock }) } : i
         )
       }
       return [
         ...prev,
-        { id, name: product.name, price: product.price, image, quantity }
+        { id, name: product.name, price: product.price, image, quantity: addQty, ...(stock !== undefined && { stock }) }
       ]
     })
   }, [])
@@ -134,7 +145,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return
     }
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+      prev.map((i) => {
+        if (i.id !== id) return i
+        const capped = i.stock !== undefined ? Math.min(quantity, i.stock) : quantity
+        return { ...i, quantity: capped }
+      })
     )
   }, [])
 

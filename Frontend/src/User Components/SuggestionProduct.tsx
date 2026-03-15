@@ -11,7 +11,7 @@ const SuggestionProduct = ({ excludeProductId }: { excludeProductId?: string }) 
     getProducts()
       .then((res) => {
         if (!cancelled) {
-          const all = res.products || []
+          const all = (res.products || []).filter((p) => (p.stock ?? 0) > 0)
           const filtered = excludeProductId
             ? all.filter((p) => p._id !== excludeProductId)
             : all

@@ -40,8 +40,9 @@ const Cart = () => {
   const allSelected = items.length > 0 && selectedIds.size === items.length
   const someSelected = selectedIds.size > 0
 
-  const handleUpdateQuantity = (id: string, quantity: number) => {
-    const newQty = Math.max(1, quantity)
+  const handleUpdateQuantity = (id: string, quantity: number, maxStock?: number) => {
+    let newQty = Math.max(1, quantity)
+    if (maxStock !== undefined) newQty = Math.min(newQty, maxStock)
     updateQuantity(id, newQty)
   }
 
@@ -149,7 +150,7 @@ const Cart = () => {
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                               <button
                                 type="button"
-                                onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.stock)}
                                 disabled={item.quantity <= 1}
                                 className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                               >
@@ -158,12 +159,16 @@ const Cart = () => {
                               <span className="w-10 h-9 flex items-center justify-center text-sm font-semibold text-gray-800 border-x border-gray-100 tabular-nums">{item.quantity}</span>
                               <button
                                 type="button"
-                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                                className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.stock)}
+                                disabled={item.stock !== undefined && item.quantity >= item.stock}
+                                className="w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                               >
                                 +
                               </button>
                             </div>
+                            {item.stock !== undefined && (
+                              <span className="text-xs text-gray-500 tabular-nums">Stock: {item.stock}</span>
+                            )}
                             <span className="text-base font-semibold text-green-600 tabular-nums">Rs. {(item.price * item.quantity).toLocaleString()}</span>
                             <button
                               type="button"

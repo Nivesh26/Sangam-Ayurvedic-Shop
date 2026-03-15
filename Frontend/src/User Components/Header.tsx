@@ -40,9 +40,10 @@ const Header = () => {
   }, [])
 
   const q = searchQuery.trim().toLowerCase()
+  const inStockProducts = products.filter((p) => (p.stock ?? 0) > 0)
   const suggestions = !q
     ? []
-    : products.filter(
+    : inStockProducts.filter(
         (p) =>
           p.name?.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q) ||

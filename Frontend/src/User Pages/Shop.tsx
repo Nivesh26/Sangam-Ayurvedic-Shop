@@ -29,6 +29,8 @@ const Shop = () => {
   const categories = ['All', 'Digestive Care', 'Immunity Boosters', 'Herbal Supplements', 'Skin & Hair Care', 'Oils & Massage', 'Ayurvedic Medicines']
 
   const handleAddToCart = (product: ProductItem) => {
+    const stock = product.stock ?? 0
+    if (stock <= 0) return
     const firstImage = (product.imageUrls || [])[0]
     addItem({
       id: product._id,
@@ -36,19 +38,21 @@ const Shop = () => {
       price: product.price,
       image: firstImage ? productImageUrl(firstImage) : '',
       category: product.category,
-      description: product.description
+      description: product.description,
+      stock: product.stock,
     })
     toast.success('Added to cart')
   }
 
   const filteredProducts = products.filter((product) => {
+    const inStock = (product.stock ?? 0) > 0
     const categoryMatch = selectedCategory === 'All' || product.category === selectedCategory
     const priceMatch = product.price >= minPrice && product.price <= maxPrice
     const searchMatch = !searchQuery.trim() ||
       product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category?.toLowerCase().includes(searchQuery.toLowerCase())
-    return categoryMatch && priceMatch && searchMatch
+    return inStock && categoryMatch && priceMatch && searchMatch
   })
 
   return (
@@ -184,12 +188,18 @@ const Shop = () => {
                           <span className="text-xl font-bold text-gray-800">Rs. {product.price}</span>
                         </div>
 
-                        <button
-                          onClick={() => handleAddToCart(product)}
-                          className="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-all duration-300 text-sm font-medium"
-                        >
-                          Add to Cart
-                        </button>
+                        {(product.stock ?? 0) <= 0 ? (
+                          <span className="block w-full bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-center text-sm font-medium cursor-not-allowed">
+                            Out of stock
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleAddToCart(product)}
+                            className="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-all duration-300 text-sm font-medium"
+                          >
+                            Add to Cart
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

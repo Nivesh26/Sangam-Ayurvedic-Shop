@@ -39,6 +39,7 @@ const Productdetail = () => {
   const [error, setError] = useState('')
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [addToCartQty, setAddToCartQty] = useState(1)
   const { addItem } = useCart()
   const { storeOpen } = useStoreStatus()
 
@@ -52,6 +53,7 @@ const Productdetail = () => {
         if (!cancelled) {
           setProduct(res.product)
           setSelectedImageIndex(0)
+          setAddToCartQty(1)
         }
       })
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load product') })
@@ -61,16 +63,23 @@ const Productdetail = () => {
 
   const handleAddToCart = () => {
     if (!product) return
+    const stock = product.stock ?? 0
+    if (stock <= 0) return
+    const qty = Math.max(1, Math.min(addToCartQty, stock))
     const firstImage = (product.imageUrls || [])[0]
-    addItem({
-      id: product._id,
-      name: product.name,
-      price: product.price,
-      image: firstImage ? productImageUrl(firstImage) : '',
-      category: product.category,
-      description: product.description
-    })
-    toast.success('Added to cart')
+    addItem(
+      {
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        image: firstImage ? productImageUrl(firstImage) : '',
+        category: product.category,
+        description: product.description,
+        stock: product.stock,
+      },
+      qty
+    )
+    toast.success(`Added ${qty} to cart`)
   }
 
   const handleReviewSubmit = (e: React.FormEvent) => {
@@ -171,16 +180,60 @@ const Productdetail = () => {
             <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
               <p className="text-sm font-medium text-green-600 mb-1">{product.category}</p>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{product.name}</h1>
-              <p className="text-3xl font-bold text-gray-800 mb-6">Rs. {product.price}</p>
+              <p className="text-3xl font-bold text-gray-800 mb-2">Rs. {product.price}</p>
+              <p className="text-sm text-gray-600 mb-6">
+                {(product.stock ?? 0) <= 0 ? (
+                  <span className="font-medium text-red-600">Out of stock</span>
+                ) : (
+                  <span className="font-medium text-green-700">In stock: {(product.stock ?? 0)} available</span>
+                )}
+              </p>
               <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
 
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-                >
-                  Add to Cart
-                </button>
+              <div className="flex flex-wrap items-center gap-3">
+                {(product.stock ?? 0) <= 0 ? (
+                  <span className="inline-block bg-gray-200 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
+                    Out of stock
+                  </span>
+                ) : (
+                  <>
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
+                      <button
+                        type="button"
+                        onClick={() => setAddToCartQty((q) => Math.max(1, q - 1))}
+                        className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={product.stock ?? undefined}
+                        value={addToCartQty}
+                        onChange={(e) => {
+                          const v = parseInt(e.target.value, 10)
+                          if (!Number.isNaN(v)) setAddToCartQty(Math.max(1, Math.min(v, product.stock ?? 9999)))
+                        }}
+                        className="w-14 h-10 text-center border-x border-gray-200 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAddToCartQty((q) => Math.min(product.stock ?? 9999, q + 1))}
+                        className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleAddToCart}
+                      className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </>
+                )}
                 <Link
                   to="/shop"
                   className="inline-flex items-center justify-center border border-green-600 text-green-600 px-6 py-3 rounded-lg font-medium hover:bg-green-50 transition-colors"

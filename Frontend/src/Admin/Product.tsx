@@ -17,6 +17,7 @@ const Product = () => {
     price: '',
     category: CATEGORIES[0],
     description: '',
+    stock: '0',
     existingImageUrls: [] as string[],
     selectedFiles: [] as File[],
   })
@@ -55,6 +56,7 @@ const Product = () => {
       price: '',
       category: CATEGORIES[0],
       description: '',
+      stock: '0',
       existingImageUrls: [],
       selectedFiles: [],
     })
@@ -68,6 +70,7 @@ const Product = () => {
       price: String(product.price),
       category: product.category,
       description: product.description || '',
+      stock: String(product.stock ?? 0),
       existingImageUrls: product.imageUrls || [],
       selectedFiles: [],
     })
@@ -113,6 +116,7 @@ const Product = () => {
       formData.append('price', String(price))
       formData.append('category', form.category)
       formData.append('description', form.description.trim())
+      formData.append('stock', form.stock)
       if (editingId) {
         formData.append('existingImageUrls', JSON.stringify(form.existingImageUrls))
       }
@@ -203,6 +207,18 @@ const Product = () => {
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label htmlFor="product-stock" className="block text-sm font-medium text-gray-700 mb-1.5">Stock</label>
+                <input
+                  id="product-stock"
+                  type="number"
+                  min="0"
+                  value={form.stock}
+                  onChange={(e) => setForm((prev) => ({ ...prev, stock: e.target.value }))}
+                  placeholder="0"
+                  className={inputBase}
+                />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Product images (max {MAX_IMAGES})</label>
@@ -323,6 +339,7 @@ const Product = () => {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Price (Rs.)</th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -330,11 +347,11 @@ const Product = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">Loading products…</td>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">Loading products…</td>
                   </tr>
                 ) : filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                       {products.length === 0 ? 'No products yet. Add one above.' : 'No products match your search.'}
                     </td>
                   </tr>
@@ -357,6 +374,13 @@ const Product = () => {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-800 text-right tabular-nums">Rs. {product.price.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-sm text-right">
+                        {(product.stock ?? 0) === 0 ? (
+                          <span className="text-red-600 font-medium">No stock</span>
+                        ) : (
+                          <span className="text-gray-600 tabular-nums">{product.stock}</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{product.description || '—'}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
