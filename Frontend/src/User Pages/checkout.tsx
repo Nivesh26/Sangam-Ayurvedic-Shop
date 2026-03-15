@@ -173,7 +173,7 @@ const Checkout = () => {
                     disabled={!storeOpen || placing}
                     className="w-full bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-green-600"
                   >
-                    {placing ? 'Placing order…' : paymentMethod === 'cod' ? 'Place order (Pay on delivery)' : 'Place order'}
+                    {placing ? 'Placing order…' : 'Place order'}
                   </button>
                 </div>
               </div>

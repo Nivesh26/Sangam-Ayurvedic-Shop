@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { FaUser, FaShoppingCart } from 'react-icons/fa'
 import { getUser } from '../api/auth'
 import { getProducts, productImageUrl, type ProductItem } from '../api/products'
+import { useCart } from '../context/CartContext'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `font-medium transition-colors ${isActive ? 'text-red-600' : 'text-gray-700 hover:text-red-600'}`
@@ -11,6 +12,7 @@ const MAX_SUGGESTIONS = 6
 
 const Header = () => {
   const user = getUser()
+  const { itemCount } = useCart()
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [products, setProducts] = useState<ProductItem[]>([])
@@ -149,11 +151,16 @@ const Header = () => {
               <NavLink
                 to="/cart"
                 className={({ isActive }) =>
-                  `p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
+                  `relative p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
                 }
                 aria-label="Cart"
               >
                 <FaShoppingCart className="w-5 h-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
+                    {itemCount > 99 ? '99+' : itemCount}
+                  </span>
+                )}
               </NavLink>
               <NavLink
                 to="/profile"

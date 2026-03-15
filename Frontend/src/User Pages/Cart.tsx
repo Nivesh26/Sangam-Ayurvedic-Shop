@@ -264,17 +264,21 @@ const Cart = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </Link>
-                    {storeOpen ? (
+                    {!storeOpen ? (
+                      <span className="flex items-center justify-center w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-xl text-sm font-semibold cursor-not-allowed">
+                        Checkout unavailable (store closed)
+                      </span>
+                    ) : !someSelected ? (
+                      <span className="flex items-center justify-center w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-xl text-sm font-semibold cursor-not-allowed">
+                        Select at least one item to checkout
+                      </span>
+                    ) : (
                       <Link
                         to="/checkout"
                         className="flex items-center justify-center w-full bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm"
                       >
                         Proceed to Checkout
                       </Link>
-                    ) : (
-                      <span className="flex items-center justify-center w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-xl text-sm font-semibold cursor-not-allowed">
-                        Checkout unavailable (store closed)
-                      </span>
                     )}
                   </div>
                 </div>

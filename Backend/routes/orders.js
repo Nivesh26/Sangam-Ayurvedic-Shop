@@ -2,6 +2,7 @@ import express from 'express';
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import User from '../models/User.js';
+import Product from '../models/Product.js';
 import Notification from '../models/Notification.js';
 import { protect } from '../middleware/auth.js';
 
@@ -41,6 +42,21 @@ router.post('/', protect, async (req, res) => {
       price: Number(i.price),
     }));
 
+    // Check stock and reduce after order
+    for (const item of items) {
+      const product = await Product.findById(item.productId).select('stock name').lean();
+      if (!product) {
+        return res.status(400).json({ success: false, message: `Product not found: ${item.productName}` });
+      }
+      const currentStock = product.stock ?? 0;
+      if (currentStock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Not enough stock for "${product.name}". Available: ${currentStock}, requested: ${item.quantity}.`,
+        });
+      }
+    }
+
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const tax = Math.round(subtotal * TAX_RATE);
     const total = subtotal + tax;
@@ -57,6 +73,11 @@ router.post('/', protect, async (req, res) => {
     });
 
     await Cart.findOneAndUpdate({ user: req.userId }, { $set: { items: [], itemCount: 0, totalQuantity: 0 } });
+
+    // Reduce stock for each product in the order
+    for (const item of items) {
+      await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+    }
 
     const orderObj = order.toObject();
     res.status(201).json({
