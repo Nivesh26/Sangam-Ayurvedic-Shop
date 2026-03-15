@@ -35,26 +35,29 @@ router.post('/', protect, async (req, res) => {
       return res.status(401).json({ success: false, message: 'User not found.' });
     }
 
-    const items = itemsBody.map((i) => ({
+    const itemsInput = itemsBody.map((i) => ({
       productId: i.productId,
       productName: String(i.productName).trim(),
       quantity: Math.max(1, Math.floor(i.quantity)),
       price: Number(i.price),
     }));
 
-    // Check stock and reduce after order
-    for (const item of items) {
-      const product = await Product.findById(item.productId).select('stock name').lean();
+    // Check stock and get image for each item
+    const items = [];
+    for (const it of itemsInput) {
+      const product = await Product.findById(it.productId).select('stock name imageUrls').lean();
       if (!product) {
-        return res.status(400).json({ success: false, message: `Product not found: ${item.productName}` });
+        return res.status(400).json({ success: false, message: `Product not found: ${it.productName}` });
       }
       const currentStock = product.stock ?? 0;
-      if (currentStock < item.quantity) {
+      if (currentStock < it.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Not enough stock for "${product.name}". Available: ${currentStock}, requested: ${item.quantity}.`,
+          message: `Not enough stock for "${product.name}". Available: ${currentStock}, requested: ${it.quantity}.`,
         });
       }
+      const imageUrl = (product.imageUrls && product.imageUrls[0]) ? product.imageUrls[0] : '';
+      items.push({ ...it, imageUrl });
     }
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -72,7 +75,29 @@ router.post('/', protect, async (req, res) => {
       paymentMethod: paymentMethod === 'cod' ? 'cod' : 'cod',
     });
 
-    await Cart.findOneAndUpdate({ user: req.userId }, { $set: { items: [], itemCount: 0, totalQuantity: 0 } });
+    // Remove only ordered items from cart (keep the rest)
+    const cartDoc = await Cart.findOne({ user: req.userId }).lean();
+    if (cartDoc && Array.isArray(cartDoc.items) && cartDoc.items.length > 0) {
+      const orderQtyByProduct = {};
+      for (const it of items) {
+        const id = String(it.productId);
+        orderQtyByProduct[id] = (orderQtyByProduct[id] || 0) + it.quantity;
+      }
+      const newCartItems = cartDoc.items
+        .map((entry) => {
+          const pid = String(entry.product);
+          const deduct = orderQtyByProduct[pid] || 0;
+          const newQty = Math.max(0, (entry.quantity || 0) - deduct);
+          if (newQty > 0) return { product: entry.product, quantity: newQty };
+          return null;
+        })
+        .filter(Boolean);
+      const totalQuantity = newCartItems.reduce((sum, i) => sum + i.quantity, 0);
+      await Cart.findOneAndUpdate(
+        { user: req.userId },
+        { $set: { items: newCartItems, itemCount: newCartItems.length, totalQuantity } }
+      );
+    }
 
     // Reduce stock for each product in the order
     for (const item of items) {
@@ -109,6 +134,11 @@ router.get('/my-orders', protect, async (req, res) => {
     const orders = await Order.find({ user: req.userId })
       .sort({ createdAt: -1 })
       .lean();
+    const productIds = [...new Set(orders.flatMap((o) => o.items.map((i) => i.productId).filter(Boolean)))];
+    const products = await Product.find({ _id: { $in: productIds } }).select('imageUrls').lean();
+    const imageByProductId = Object.fromEntries(
+      products.map((p) => [String(p._id), (p.imageUrls && p.imageUrls[0]) || ''])
+    );
     const ordersForClient = orders.map((o) => ({
       _id: o._id,
       id: `ORD-${String(o._id).slice(-6).toUpperCase()}`,
@@ -118,6 +148,7 @@ router.get('/my-orders', protect, async (req, res) => {
       status: o.status,
       items: o.items.map((i) => ({
         productName: i.productName,
+        imageUrl: (i.imageUrl && i.imageUrl.trim()) || imageByProductId[String(i.productId)] || '',
         quantity: i.quantity,
         price: i.price,
       })),
@@ -140,6 +171,11 @@ router.get('/', protect, async (req, res) => {
     const orders = await Order.find()
       .sort({ createdAt: -1 })
       .lean();
+    const productIds = [...new Set(orders.flatMap((o) => o.items.map((i) => i.productId).filter(Boolean)))];
+    const products = await Product.find({ _id: { $in: productIds } }).select('imageUrls').lean();
+    const imageByProductId = Object.fromEntries(
+      products.map((p) => [String(p._id), (p.imageUrls && p.imageUrls[0]) || ''])
+    );
     const ordersForClient = orders.map((o) => ({
       _id: o._id,
       id: `ORD-${String(o._id).slice(-6).toUpperCase()}`,
@@ -149,6 +185,7 @@ router.get('/', protect, async (req, res) => {
       status: o.status,
       items: o.items.map((i) => ({
         productName: i.productName,
+        imageUrl: (i.imageUrl && i.imageUrl.trim()) || imageByProductId[String(i.productId)] || '',
         quantity: i.quantity,
         price: i.price,
       })),

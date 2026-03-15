@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import Navbar from '../AdminComponent/Navbar'
 import { getOrders, updateOrderStatus as updateOrderStatusAPI, type OrderFromAPI } from '../api/orders'
+import { productImageUrl } from '../api/products'
 
 type OrderItem = {
   productName: string
+  imageUrl?: string
   quantity: number
   price: number
 }
@@ -219,7 +221,31 @@ const Orders = () => {
                               <tbody>
                                 {order.items.map((item, idx) => (
                                   <tr key={idx} className="border-b border-gray-50 last:border-0">
-                                    <td className="px-4 py-3 text-sm font-medium text-gray-800">{item.productName}</td>
+                                    <td className="px-4 py-3">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center">
+                                          {item.imageUrl?.trim() ? (
+                                            <img
+                                              src={item.imageUrl.trim().startsWith('/') ? item.imageUrl.trim() : productImageUrl(item.imageUrl.trim())}
+                                              alt={item.productName}
+                                              className="w-full h-full object-cover"
+                                              onError={(e) => {
+                                                e.currentTarget.style.display = 'none'
+                                                const next = e.currentTarget.nextElementSibling
+                                                if (next) (next as HTMLElement).style.display = 'flex'
+                                              }}
+                                            />
+                                          ) : null}
+                                          <div
+                                            className="w-full h-full flex items-center justify-center text-gray-400 text-xs"
+                                            style={{ display: item.imageUrl?.trim() ? 'none' : 'flex' }}
+                                          >
+                                            —
+                                          </div>
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-800">{item.productName}</span>
+                                      </div>
+                                    </td>
                                     <td className="px-4 py-3 text-sm text-gray-600 text-right tabular-nums">{item.quantity}</td>
                                     <td className="px-4 py-3 text-sm text-gray-600 text-right tabular-nums">{item.price.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-sm font-medium text-gray-800 text-right tabular-nums">

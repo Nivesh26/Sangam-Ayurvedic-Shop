@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
 import { getMyOrders, type OrderFromAPI } from '../api/orders'
+import { productImageUrl } from '../api/products'
 
 const statusColors: Record<OrderFromAPI['status'], string> = {
   Pending: 'bg-amber-100 text-amber-800',
@@ -110,7 +111,31 @@ const Purchaseitems = () => {
                         <tbody>
                           {order.items.map((item, idx) => (
                             <tr key={idx} className="border-b border-gray-100">
-                              <td className="py-2.5 text-gray-800">{item.productName}</td>
+                              <td className="py-2.5">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center">
+                                    {item.imageUrl?.trim() ? (
+                                      <img
+                                        src={item.imageUrl.trim().startsWith('/') ? item.imageUrl.trim() : productImageUrl(item.imageUrl.trim())}
+                                        alt={item.productName}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none'
+                                          const next = e.currentTarget.nextElementSibling
+                                          if (next) (next as HTMLElement).style.display = 'flex'
+                                        }}
+                                      />
+                                    ) : null}
+                                    <div
+                                      className="w-full h-full flex items-center justify-center text-gray-400 text-xs"
+                                      style={{ display: item.imageUrl?.trim() ? 'none' : 'flex' }}
+                                    >
+                                      —
+                                    </div>
+                                  </div>
+                                  <span className="text-gray-800">{item.productName}</span>
+                                </div>
+                              </td>
                               <td className="py-2.5 text-right text-gray-600 tabular-nums">{item.quantity}</td>
                               <td className="py-2.5 text-right font-medium text-gray-900 tabular-nums">
                                 Rs. {(item.quantity * item.price).toLocaleString()}

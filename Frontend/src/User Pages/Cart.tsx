@@ -275,6 +275,7 @@ const Cart = () => {
                     ) : (
                       <Link
                         to="/checkout"
+                        state={{ selectedIds: Array.from(selectedIds) }}
                         className="flex items-center justify-center w-full bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm"
                       >
                         Proceed to Checkout

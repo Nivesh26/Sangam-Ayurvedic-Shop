@@ -16,6 +16,7 @@ export type CreateOrderPayload = {
 
 export type OrderItemFromAPI = {
   productName: string
+  imageUrl?: string
   quantity: number
   price: number
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
@@ -15,22 +15,27 @@ const Checkout = () => {
   const { items, refreshCart } = useCart()
   const { storeOpen } = useStoreStatus()
   const navigate = useNavigate()
+  const location = useLocation()
+  const selectedIds = (location.state as { selectedIds?: string[] } | null)?.selectedIds
+  const itemsToOrder = selectedIds?.length
+    ? items.filter((i) => selectedIds.includes(i.id))
+    : items
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod')
   const [placing, setPlacing] = useState(false)
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const subtotal = itemsToOrder.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const tax = Math.round(subtotal * TAX_RATE)
   const total = subtotal + tax
 
   const handlePlaceOrder = async () => {
-    if (items.length === 0) return
+    if (itemsToOrder.length === 0) return
     if (!storeOpen) {
       toast.error('Store is closed. Orders are not being accepted.')
       return
     }
     setPlacing(true)
     try {
-      const orderItems = items.map((i) => ({
+      const orderItems = itemsToOrder.map((i) => ({
         productId: i.id.replace(/^product-/, ''),
         productName: i.name,
         quantity: i.quantity,
@@ -47,13 +52,17 @@ const Checkout = () => {
     }
   }
 
-  if (items.length === 0) {
+  if (itemsToOrder.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
         <main className="flex-1 py-16 px-4 flex flex-col items-center justify-center">
-          <p className="text-gray-600 mb-4">Your cart is empty. Add items to checkout.</p>
-          <Link to="/shop" className="text-green-600 font-medium hover:text-green-700">Continue Shopping</Link>
+          <p className="text-gray-600 mb-4">
+            {items.length === 0
+              ? 'Your cart is empty. Add items to checkout.'
+              : 'No items selected. Go to cart and select items to checkout.'}
+          </p>
+          <Link to="/cart" className="text-green-600 font-medium hover:text-green-700">Back to cart</Link>
         </main>
         <Footer />
       </div>
@@ -134,7 +143,7 @@ const Checkout = () => {
                       </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                      {items.map((item) => (
+                      {itemsToOrder.map((item) => (
                         <tr key={item.id} className="border-b border-gray-50">
                           <td className="py-3 pr-3 align-top">
                             <span className="line-clamp-2 text-gray-800">{item.name}</span>
