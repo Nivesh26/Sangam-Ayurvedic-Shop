@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
 import { getMyOrders, cancelMyOrder, type OrderFromAPI } from '../api/orders'
@@ -102,9 +103,10 @@ const Purchaseitems = () => {
                                 setOrders((prev) =>
                                   prev.map((o) => (o._id === order._id ? { ...o, status: res.order.status } : o))
                                 )
+                                toast.success('Order cancelled.')
                               })
-                              .catch(() => {
-                                // optional toast handled elsewhere if needed
+                              .catch((err) => {
+                                toast.error(err instanceof Error ? err.message : 'Failed to cancel order.')
                               })
                               .finally(() => {
                                 setCancellingId(null)

@@ -3,7 +3,6 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import User from '../models/User.js';
 import Product from '../models/Product.js';
-import Notification from '../models/Notification.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -217,15 +216,6 @@ router.put('/:id/status', protect, async (req, res) => {
     order.status = status;
     await order.save();
 
-    const orderDisplayId = `ORD-${String(order._id).slice(-6).toUpperCase()}`;
-    const message = `Your order ${orderDisplayId} status is now ${status}.`;
-    await Notification.create({
-      user: order.user,
-      orderId: order._id,
-      orderDisplayId,
-      message,
-    });
-
     res.json({ success: true, order: order.toObject() });
   } catch (error) {
     console.error('Update order status error:', error);
@@ -244,15 +234,6 @@ router.put('/:id/cancel', protect, async (req, res) => {
     }
     order.status = 'Cancelled';
     await order.save();
-
-    const orderDisplayId = `ORD-${String(order._id).slice(-6).toUpperCase()}`;
-    const message = `Your order ${orderDisplayId} has been cancelled.`;
-    await Notification.create({
-      user: order.user,
-      orderId: order._id,
-      orderDisplayId,
-      message,
-    });
 
     res.json({ success: true, order: order.toObject() });
   } catch (error) {
