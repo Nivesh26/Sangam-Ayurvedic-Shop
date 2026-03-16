@@ -17,7 +17,7 @@ type Order = {
   customerName: string
   customerEmail: string
   date: string
-  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered'
+  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled'
   items: OrderItem[]
   total: number
 }
@@ -40,6 +40,7 @@ const statusColors: Record<Order['status'], string> = {
   Confirmed: 'bg-blue-100 text-blue-800',
   Shipped: 'bg-indigo-100 text-indigo-800',
   Delivered: 'bg-green-100 text-green-800',
+  Cancelled: 'bg-red-100 text-red-700',
 }
 
 const STATUS_FLOW: Order['status'][] = ['Pending', 'Confirmed', 'Shipped', 'Delivered']

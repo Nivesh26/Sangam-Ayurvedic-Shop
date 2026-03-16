@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../User Components/Header'
 import Footer from '../User Components/Footer'
-import { getMyOrders, type OrderFromAPI } from '../api/orders'
+import { getMyOrders, cancelMyOrder, type OrderFromAPI } from '../api/orders'
 import { productImageUrl } from '../api/products'
 
 const statusColors: Record<OrderFromAPI['status'], string> = {
@@ -10,6 +10,7 @@ const statusColors: Record<OrderFromAPI['status'], string> = {
   Confirmed: 'bg-blue-100 text-blue-800',
   Shipped: 'bg-indigo-100 text-indigo-800',
   Delivered: 'bg-green-100 text-green-800',
+  Cancelled: 'bg-red-100 text-red-700',
 }
 
 const Purchaseitems = () => {
@@ -17,6 +18,7 @@ const Purchaseitems = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -83,9 +85,37 @@ const Purchaseitems = () => {
                         {order.status}
                       </span>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <span className="text-sm text-gray-500">{order.date}</span>
-                      <span className="text-lg font-bold text-gray-900">Rs. {order.total.toLocaleString()}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500">{order.date}</span>
+                        <span className="text-lg font-bold text-gray-900">Rs. {order.total.toLocaleString()}</span>
+                      </div>
+                      {['Pending', 'Confirmed'].includes(order.status) && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (cancellingId) return
+                            setCancellingId(order._id)
+                            cancelMyOrder(order._id)
+                              .then((res) => {
+                                setOrders((prev) =>
+                                  prev.map((o) => (o._id === order._id ? { ...o, status: res.order.status } : o))
+                                )
+                              })
+                              .catch(() => {
+                                // optional toast handled elsewhere if needed
+                              })
+                              .finally(() => {
+                                setCancellingId(null)
+                              })
+                          }}
+                          disabled={!!cancellingId}
+                          className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {cancellingId === order._id ? 'Cancelling…' : 'Cancel order'}
+                        </button>
+                      )}
                       <svg
                         className={`w-5 h-5 text-gray-400 transition-transform ${expandedId === order._id ? 'rotate-180' : ''}`}
                         fill="none"

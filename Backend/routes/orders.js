@@ -232,5 +232,33 @@ router.put('/:id/status', protect, async (req, res) => {
     res.status(500).json({ success: false, message: error.message || 'Failed to update status.' });
   }
 });
+// PUT /api/orders/:id/cancel – cancel order by customer (only when pending/confirmed)
+router.put('/:id/cancel', protect, async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    if (!['Pending', 'Confirmed'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: 'Only pending or confirmed orders can be cancelled.' });
+    }
+    order.status = 'Cancelled';
+    await order.save();
+
+    const orderDisplayId = `ORD-${String(order._id).slice(-6).toUpperCase()}`;
+    const message = `Your order ${orderDisplayId} has been cancelled.`;
+    await Notification.create({
+      user: order.user,
+      orderId: order._id,
+      orderDisplayId,
+      message,
+    });
+
+    res.json({ success: true, order: order.toObject() });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to cancel order.' });
+  }
+});
 
 export default router;

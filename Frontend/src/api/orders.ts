@@ -27,7 +27,7 @@ export type OrderFromAPI = {
   customerName: string
   customerEmail: string
   date: string
-  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered'
+  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled'
   items: OrderItemFromAPI[]
   total: number
 }
@@ -64,6 +64,18 @@ export async function getMyOrders(): Promise<{ success: boolean; orders: OrderFr
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data?.message || 'Failed to load your orders.')
+  return data
+}
+
+export async function cancelMyOrder(orderId: string): Promise<{ success: boolean; order: OrderFromAPI }> {
+  const token = getAuthToken()
+  if (!token) throw new Error('Not logged in.')
+  const res = await fetch(`${API_URL}/api/orders/${orderId}/cancel`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.message || 'Failed to cancel order.')
   return data
 }
 
