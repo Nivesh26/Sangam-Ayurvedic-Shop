@@ -6,6 +6,25 @@ import { uploadProductImages } from '../middleware/upload.js';
 
 const router = express.Router();
 
+const getUploadedProductImages = (req) => {
+  const files = Array.isArray(req.files) ? req.files : [];
+  const allowedFields = new Set(['images', 'image', 'images[]', 'image[]']);
+  return files
+    .filter((f) => f && allowedFields.has(String(f.fieldname || '').trim()))
+    .slice(0, 4)
+    .map((f) => `/uploads/products/${f.filename}`);
+};
+
+const getBodyValue = (body, key) => {
+  if (!body || typeof body !== 'object') return undefined;
+  if (Object.prototype.hasOwnProperty.call(body, key)) return body[key];
+  const target = String(key).toLowerCase();
+  for (const k of Object.keys(body)) {
+    if (String(k).trim().toLowerCase() === target) return body[k];
+  }
+  return undefined;
+};
+
 const requireAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
@@ -51,14 +70,15 @@ router.post('/', protect, requireAdmin, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, category, stock } = req.body;
+    const name = getBodyValue(req.body, 'name');
+    const description = getBodyValue(req.body, 'description');
+    const price = getBodyValue(req.body, 'price');
+    const category = getBodyValue(req.body, 'category');
+    const stock = getBodyValue(req.body, 'stock');
     if (!name || price == null || !category) {
       return res.status(400).json({ success: false, message: 'Name, price and category are required.' });
     }
-    const imageUrls = (req.files || []).map((f) => `/uploads/products/${f.filename}`);
-    if (imageUrls.length > 4) {
-      return res.status(400).json({ success: false, message: 'Maximum 4 images allowed.' });
-    }
+    const imageUrls = getUploadedProductImages(req);
     const stockNum = stock !== undefined && stock !== '' ? Math.max(0, parseInt(String(stock), 10) || 0) : 0;
     const product = await Product.create({
       name: name.trim(),
@@ -83,7 +103,12 @@ router.put('/:id', protect, requireAdmin, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, category, existingImageUrls, stock } = req.body;
+    const name = getBodyValue(req.body, 'name');
+    const description = getBodyValue(req.body, 'description');
+    const price = getBodyValue(req.body, 'price');
+    const category = getBodyValue(req.body, 'category');
+    const existingImageUrls = getBodyValue(req.body, 'existingImageUrls');
+    const stock = getBodyValue(req.body, 'stock');
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
@@ -93,7 +118,7 @@ router.put('/:id', protect, requireAdmin, (req, res, next) => {
     if (price !== undefined) product.price = Number(price);
     if (category !== undefined) product.category = category.trim();
     if (stock !== undefined && stock !== '') product.stock = Math.max(0, parseInt(String(stock), 10) || 0);
-    const newPaths = (req.files || []).map((f) => `/uploads/products/${f.filename}`);
+    const newPaths = getUploadedProductImages(req);
     let kept = [];
     try {
       kept = typeof existingImageUrls === 'string' ? JSON.parse(existingImageUrls) : (existingImageUrls || []);

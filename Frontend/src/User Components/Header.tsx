@@ -19,6 +19,7 @@ const Header = () => {
   const [productsLoaded, setProductsLoaded] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (!productsLoaded && searchQuery.trim().length >= 1) {
@@ -40,6 +41,16 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  const closeMobileMenu = () => setMobileMenuOpen(false)
 
   const q = searchQuery.trim().toLowerCase()
   const inStockProducts = products.filter((p) => (p.stock ?? 0) > 0)
@@ -181,7 +192,85 @@ const Header = () => {
             </Link>
           )}
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          type="button"
+          className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((v) => !v)}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d={mobileMenuOpen ? 'M18 6 6 18' : 'M4 6h16'} />
+            <path d={mobileMenuOpen ? 'M6 6l12 12' : 'M4 12h16'} />
+            <path d={mobileMenuOpen ? '' : 'M4 18h16'} />
+          </svg>
+        </button>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 px-6 pb-4">
+          <ul className="flex flex-col pt-3 space-y-2">
+            <li>
+              <NavLink to="/" end className={navLinkClass} onClick={closeMobileMenu}>Home</NavLink>
+            </li>
+            <li>
+              <NavLink to="/new" className={navLinkClass} onClick={closeMobileMenu}>New</NavLink>
+            </li>
+            <li>
+              <NavLink to="/shop" className={navLinkClass} onClick={closeMobileMenu}>Shop</NavLink>
+            </li>
+            <li>
+              <NavLink to="/aboutus" className={navLinkClass} onClick={closeMobileMenu}>About Us</NavLink>
+            </li>
+            <li>
+              <NavLink to="/contact" className={navLinkClass} onClick={closeMobileMenu}>Contact</NavLink>
+            </li>
+          </ul>
+
+          <div className="mt-4 flex items-center gap-4">
+            {user ? (
+              <>
+                <NavLink
+                  to="/cart"
+                  className={({ isActive }) =>
+                    `relative p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
+                  }
+                  aria-label="Cart"
+                  onClick={closeMobileMenu}
+                >
+                  <FaShoppingCart className="w-5 h-5" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1">
+                      {itemCount > 99 ? '99+' : itemCount}
+                    </span>
+                  )}
+                </NavLink>
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `p-2 transition-colors rounded-lg hover:bg-gray-100 ${isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'}`
+                  }
+                  aria-label="Profile"
+                  onClick={closeMobileMenu}
+                >
+                  <FaUser className="w-5 h-5" />
+                </NavLink>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition w-full text-center"
+                onClick={closeMobileMenu}
+              >
+                Login
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
